@@ -98,7 +98,7 @@
 				for(var bg = 0; bg < bubblesGroups.length; bg ++ ){
 					for(var bb = 0; bb<bubblesGroups[bg].length; bb++){
 						var cBubble = bubblesGroups[bg][bb];
-						if(!!cBubble){
+						if(!!cBubble && delta < 1){
 							cBubble.userData.radius += delta;
 							if (cBubble.userData.radius >= (bubbleSize - (bubblesSize*2))){
 								cBubble.userData.radius = bubblesStartRadius;
