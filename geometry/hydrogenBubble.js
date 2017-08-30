@@ -45,7 +45,7 @@
 	
 	//hydrogen buble
 	var bubbleSize=8;
-	var bubbleGeometry = new THREE.SphereGeometry( bubbleSize, 32, 32 );
+	/*var bubbleGeometry = new THREE.SphereGeometry( bubbleSize, 32, 32 );
 	for ( var i = 0; i < 10; i ++ ) {
 
 		var vertices = [];
@@ -61,27 +61,19 @@
 
 		bubbleGeometry.morphTargets.push( { name: "morphTarget" + i, vertices: vertices } );
 
-	}
+	}*/
 	
-	var bubbleMaterial = new THREE.MeshPhysicalMaterial( {transparent:true, opacity:0.4, color: 0xAB82FF, roughness:0.22, metalness:0.5, morphTargets: true} );
-	var bubble = new THREE.Mesh( bubbleGeometry, bubbleMaterial );
-	bubble.renderOrder=1;
+	//var bubbleMaterial = new THREE.MeshPhysicalMaterial( {transparent:true, opacity:0.4, color: 0xAB82FF, roughness:0.22, metalness:0.5, morphTargets: true} );
+	var bubble = new THREE.HydrogenBubble(bubbleSize);//THREE.HB.factory( bubbleSize, bubbleMaterial );
+	//bubble.renderOrder=1;
 	scene.add( bubble );
 	
-	var nucleusGeometry = new THREE.SphereGeometry( bubbleSize/4, 16, 16 );
+	/*var nucleusGeometry = new THREE.SphereGeometry( bubbleSize/4, 16, 16 );
 	var nucleusMaterial = new THREE.MeshPhysicalMaterial( {transparent:true, opacity:0.4, color: 0x00E5EE, roughness:0.22, metalness:0.5} );
 	var nucleus = new THREE.Mesh( nucleusGeometry, nucleusMaterial );
 	nucleus.renderOrder=0;
-	bubble.add( nucleus );
+	bubble.add( nucleus );*/
 	bubble.scale.set(0.01,0.01,0.01);
-	
-	var maxBubblesGroup = 32;
-	var maxBubble = 3;
-	var bubblesGroups = [];
-	var bubblesStartRadius = bubbleSize/4;
-	var bubblesSize = 0.2;
-	var bubblesGeometry = new THREE.SphereGeometry( bubblesSize, 8, 8 );
-	var bubblesMaterial = new THREE.MeshPhysicalMaterial( {transparent:true, opacity:0.4, color: 0xFFFFFF, roughness:0.22, metalness:0.5} );
 
 	
 	var curInfluence=0;
@@ -92,59 +84,12 @@
 			controls.update( delta );
 			
 			if(bubble.scale.length()<1){
-				bubble.scale.addScalar ( delta/5 );
-			}else{
-				//Bubbling up
-				for(var bg = 0; bg < bubblesGroups.length; bg ++ ){
-					for(var bb = 0; bb<bubblesGroups[bg].length; bb++){
-						var cBubble = bubblesGroups[bg][bb];
-						if(!!cBubble && delta < 1){
-							cBubble.userData.radius += delta;
-							if (cBubble.userData.radius >= (bubbleSize - (bubblesSize*2))){
-								cBubble.userData.radius = bubblesStartRadius;
-							}
-							cBubble.position.x=Math.cos(cBubble.userData.anglez) * Math.cos(cBubble.userData.anglexy) * cBubble.userData.radius;
-							cBubble.position.y=Math.cos(cBubble.userData.anglez) * Math.sin(cBubble.userData.anglexy) * cBubble.userData.radius;
-							cBubble.position.z=Math.sin(cBubble.userData.anglez) * cBubble.userData.radius;
-						}
-					}
+				if(delta <1 ){
+					bubble.scale.addScalar ( delta/5 );
 				}
-				
-				//new Bubbles
-				if(bubblesGroups.length < maxBubblesGroup){
-					if(bubblesGroups.length === 0){
-						var newBubbles = [];
-						bubblesGroups.push(newBubbles);
-					}
-					var curBubblesGroup = bubblesGroups[bubblesGroups.length-1];
-					if (curBubblesGroup.length < maxBubble){
-						var newBubble = null;
-						if (curBubblesGroup.length == 0){
-							 newBubble= new THREE.Mesh( bubblesGeometry, bubblesMaterial );
-							 newBubble.userData.radius = bubblesStartRadius;
-							 newBubble.userData.anglexy = Math.random() * Math.PI * 2;
-							 newBubble.userData.anglez = Math.acos((2*Math.random())-1)-(Math.PI/2);
-							 
-						}else{
-							var lastBubble = curBubblesGroup[curBubblesGroup.length-1];
-							if (lastBubble.userData.radius > (bubblesStartRadius + (bubblesSize*2))){
-								 newBubble = new THREE.Mesh( bubblesGeometry, bubblesMaterial );
-								 newBubble.userData.radius = bubblesStartRadius;
-								 newBubble.userData.anglexy = lastBubble.userData.anglexy + ((Math.random() - 0.5)/3) ;
-								 newBubble.userData.anglez = lastBubble.userData.anglez;
-							}
-						}
-						if(!!newBubble)	{
-							 newBubble.position.x=Math.cos(newBubble.userData.anglez) * Math.cos(newBubble.userData.anglexy) * newBubble.userData.radius;
-							 newBubble.position.y=Math.cos(newBubble.userData.anglez) * Math.sin(newBubble.userData.anglexy) * newBubble.userData.radius;
-							 newBubble.position.z=Math.sin(newBubble.userData.anglez) * newBubble.userData.radius;
-							 bubble.add( newBubble );
-							 curBubblesGroup.push(newBubble);
-						}
-					}else{
-						var newBubbles = [];
-						bubblesGroups.push(newBubbles);
-					}
+			}else{
+				if(delta <1 ){
+					bubble.evaporate(delta);
 				}
 			}
 			/*var ci=Math.round(curInfluence/100) ;
